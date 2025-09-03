@@ -27,6 +27,13 @@ def set_power_plan(plan_name: str) -> None:
         with open("error.log", "a") as log_file:
             log_file.write(f"Error setting power plan {plan}: {e}\n")
 
+# check if the menu item is the current power plan
+def is_checked(item):
+    pattern = r'GUID:\s*([a-fA-F0-9-]+)'
+    current_plan = subprocess.run(['powercfg', '-getactivescheme'], capture_output=True, text=True)
+    current_guid = re.search(pattern, current_plan.stdout).group(1)
+    return power_plans[item.text] == current_guid
+
 # menu items handler
 def on_click(tray, item):
     if item.text == "Quit":
@@ -37,7 +44,7 @@ def on_click(tray, item):
 menu_items = []
 
 for plan, guid in power_plans.items():
-    menu_items.append(pystray.MenuItem(plan, on_click))
+    menu_items.append(pystray.MenuItem(plan, on_click, checked=is_checked))
 
 menu_items.append(pystray.MenuItem("Quit", on_click))
 
