@@ -1,7 +1,6 @@
 ﻿import subprocess
 import pystray
 import PIL.Image
-from sys import exit as sys_exit
 import re
 
 # get available power plans from system
