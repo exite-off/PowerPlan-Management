@@ -32,14 +32,14 @@ def set_power_plan(plan_name: str) -> None:
             log_file.write(f"Error setting power plan {plan}: {e}\n")
 
 # check if the menu item is the current power plan
-def is_checked(item):
+def is_checked(item) -> bool:
     pattern = r'GUID:\s*([a-fA-F0-9-]+)'
     current_plan = subprocess.run(['powercfg', '-getactivescheme'], capture_output=True, text=True, startupinfo=si)
     current_guid = re.search(pattern, current_plan.stdout).group(1)
     return power_plans[item.text] == current_guid
 
 # menu items handler
-def on_click(tray, item):
+def on_click(tray, item) -> None:
     if item.text == "Quit":
         tray.stop()
     set_power_plan(item.text)
