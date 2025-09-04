@@ -3,11 +3,15 @@ import pystray
 import PIL.Image
 import re
 
+# configure subprocess to hide console window
+si = subprocess.STARTUPINFO()
+si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+
 # get available power plans from system
 def get_power_plans() -> dict[str: str]:
     pattern = r'GUID:\s*([a-fA-F0-9-]+)\s*\(([^)]+)\)' # regex pattern to match GUID and plan name
     plans: dict[str: str] = {}
-    result = subprocess.run(['powercfg', '-list'], capture_output=True, text=True)
+    result = subprocess.run(['powercfg', '-list'], capture_output=True, text=True, startupinfo=si)
     matches = re.findall(pattern, result.stdout)
     for match in matches:
         plans[match[1]] = match[0]
@@ -22,7 +26,7 @@ image = PIL.Image.open("tray_icon.png")
 # set the specified power plan
 def set_power_plan(plan_name: str) -> None:
     try:
-        subprocess.run(['powercfg', '/setactive', power_plans[plan_name]], check=True)
+        subprocess.run(['powercfg', '/setactive', power_plans[plan_name]], check=True, startupinfo=si)
     except subprocess.CalledProcessError as e:
         with open("error.log", "a") as log_file:
             log_file.write(f"Error setting power plan {plan}: {e}\n")
@@ -30,7 +34,7 @@ def set_power_plan(plan_name: str) -> None:
 # check if the menu item is the current power plan
 def is_checked(item):
     pattern = r'GUID:\s*([a-fA-F0-9-]+)'
-    current_plan = subprocess.run(['powercfg', '-getactivescheme'], capture_output=True, text=True)
+    current_plan = subprocess.run(['powercfg', '-getactivescheme'], capture_output=True, text=True, startupinfo=si)
     current_guid = re.search(pattern, current_plan.stdout).group(1)
     return power_plans[item.text] == current_guid
 

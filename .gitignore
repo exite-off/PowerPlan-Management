@@ -2,3 +2,4 @@
 /.venv/
 /output/
 /main/
+/compilation_config.json
